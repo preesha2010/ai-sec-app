@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}SecureNotes{% endblock %}</title>
+    <style>
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
+
+    body {
+        font-family:
+            Inter,
+            -apple-system,
+            BlinkMacSystemFont,
+            "Segoe UI",
+            sans-serif;
+        background: #f8f8f7;
+        color: #111111;
+        min-height: 100vh;
+    }
+
+    nav {
+        background: white;
+        border-bottom: 1px solid #e5e7eb;
+        padding: 18px 48px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .logo {
+        text-decoration: none;
+        color: #111111;
+        font-size: 18px;
+        font-weight: 600;
+        letter-spacing: -0.02em;
+    }
+
+    nav div {
+        display: flex;
+        gap: 28px;
+    }
+
+    nav div a {
+        text-decoration: none;
+        color: #6b7280;
+        font-size: 14px;
+        transition: 0.2s;
+    }
+
+    nav div a:hover {
+        color: #111111;
+    }
+
+    .container {
+        max-width: 500px;
+        margin: 80px auto;
+        padding: 0 24px;
+    }
+
+    .card {
+        background: white;
+        border: 1px solid #e5e7eb;
+        border-radius: 10px;
+        padding: 40px;
+    }
+
+    h1 {
+        font-size: 28px;
+        font-weight: 600;
+        letter-spacing: -0.03em;
+        margin-bottom: 10px;
+        color: #111111;
+    }
+
+    .subtitle {
+        color: #6b7280;
+        font-size: 15px;
+        line-height: 1.6;
+        margin-bottom: 32px;
+    }
+
+    .form-group {
+        margin-bottom: 22px;
+    }
+
+    label {
+        display: block;
+        margin-bottom: 8px;
+        font-size: 13px;
+        font-weight: 500;
+        color: #374151;
+    }
+
+    input {
+        width: 100%;
+        padding: 12px 14px;
+        border: 1px solid #d1d5db;
+        border-radius: 8px;
+        font-size: 14px;
+        background: white;
+        outline: none;
+    }
+
+    input:focus {
+        border-color: #111827;
+    }
+
+    button {
+        width: 100%;
+        padding: 13px;
+        border: none;
+        border-radius: 8px;
+        background: #111827;
+        color: white;
+        font-size: 14px;
+        font-weight: 500;
+        cursor: pointer;
+    }
+
+    button:hover {
+        background: #000000;
+    }
+
+    .alert {
+        padding: 14px;
+        border-radius: 8px;
+        margin-bottom: 24px;
+        font-size: 14px;
+    }
+
+    .alert-success {
+        background: #f3f4f6;
+        border: 1px solid #d1d5db;
+        color: #111111;
+    }
+
+    .alert-error {
+        background: #fef2f2;
+        border: 1px solid #fecaca;
+        color: #991b1b;
+    }
+
+    .link {
+        margin-top: 24px;
+        text-align: center;
+        color: #6b7280;
+        font-size: 14px;
+    }
+
+    .link a {
+        color: #111111;
+        text-decoration: none;
+    }
+
+    .link a:hover {
+        text-decoration: underline;
+    }
+
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 20px;
+    }
+
+    th {
+        text-align: left;
+        padding: 12px;
+        border-bottom: 1px solid #e5e7eb;
+        color: #6b7280;
+        font-size: 13px;
+        font-weight: 600;
+    }
+
+    td {
+        padding: 12px;
+        border-bottom: 1px solid #f3f4f6;
+        font-size: 14px;
+    }
+</style>   
+</head>
+<body>
+    <nav>
+        <a class="logo" href="/">SecureApp</a>
+        <div>
+            <a href ="/">Home</a>
+            <a href ="/login">Login</a>
+            <a href ="/register">Register</a>
+            <a href ="/admin">Admin</a>
+        </div>
+    </nav>
+    {% block content %}{% endblock %}
+</body>
+</html>

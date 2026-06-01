@@ -1,0 +1,50 @@
+{% extends 'base.html' %}
+{% block title %}Admin{% endblock %}
+
+{% block content %}
+
+<div class ="container" style="max-width: 600px;">
+    <div class = "card">
+        <h1>Admin Panel</h1>
+        <p class="subtitle">Restrictd access</p>
+
+        {% if error %}
+        <div class="alert alert-error">
+            Wrong Password
+        </div>
+        {% endif %}
+
+        {% if granted %}
+        <div class="alert alert-success">
+            Access granted
+        </div>
+        <table style="width:100%; border-collapse: collapse; margin-top: 16px; font-size: 14px;">
+            <thead>
+                <tr style="background:#f4f6f9;">
+                    <th style="padding:10px; text-align:left; border-bottom:1px solid #eee;">ID</th>
+                    <th style="padding:10px; text-align:left; border-bottom:1px solid #eee;">Username</th>
+                    <th style="padding:10px; text-align:left; border-bottom:1px solid #eee;">Password</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for user in users %}
+                <tr>
+                    <td style="padding:10px; border-bottom:1px solid #eee;">{{ user.id }}</td>
+                    <td style="padding:10px; border-bottom:1px solid #eee;">{{ user.username }}</td>
+                    <td style="padding:10px; border-bottom:1px solid #eee; color:#251580;">{{ user.password }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <form method="POST">
+            <div class="form-group">
+                <label>Admin Password</label>
+                <input type="password" name="password" placeholder="Enter admin password" required>
+            </div>
+            <button type="submit">Access granted</button>
+        </form>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
