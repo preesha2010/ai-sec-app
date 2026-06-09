@@ -1,3 +1,5 @@
+from dotenv import load_dotenv
+load_dotenv()
 from flask import Flask, redirect, render_template, request, jsonify, url_for
 import sqlite3
 import os
@@ -45,7 +47,7 @@ def register():    # register user with form
         # conn.execute('INSERT INTO users(username, password) VALUES(?,?)', (username, password))
         conn.commit()
         conn.close()
-        return render_template("register.html", success=True, username=username)
+        return redirect(url_for('login'))
     return render_template("register.html", success=False)
     
 @app.route('/login', methods=['GET', 'POST'])
@@ -59,7 +61,7 @@ def login():    # user login with form`
         # user = conn.execute('SELECT * FROM users WHERE username = ? AND password = ?',(username, password)).fetchone()
         conn.close()
         if user:
-            return render_template("login.html",success=True,username=username)
+            return redirect(url_for('home'))
         return render_template("login.html",success=False,error=True)
     return render_template("login.html", success=False, error=False)
 
