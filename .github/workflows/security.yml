@@ -23,6 +23,8 @@ jobs:
       - name: Run security scan
         env:
           GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
+          DASHBOARD_URL: ${{ secrets.DASHBOARD_URL }}
+          APP_NAME: ai-sec-app
         run:  python .github/scripts/scan.py
 
       - name: Save report
