@@ -3,11 +3,12 @@ import sys
 from groq import Groq
 import subprocess
 import requests
-from datetime import datetime
+from datetime import datetime, timedelta, timezone
 
 API_KEY = os.getenv("GROQ_API_KEY")
 client = Groq(api_key=API_KEY)
 
+IST = timezone(timedelta(hours=5, minutes=30))
 
 def changed_files():
     # returns list of files changed in the last commit
@@ -123,7 +124,7 @@ def send_to_dashboard(risk_level, files_scanned, report):
         payload = {
             "app_name": os.getenv("APP_NAME", "unknown"),
             "repo": os.getenv("GITHUB_REPOSITORY", "unknown"),
-            "push_time": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+            "push_time": datetime.now(IST).strftime("%Y-%m-%d %H:%M:%S"),
             "risk_level": risk_level,
             "files_scanned": ", ".join(files_scanned),
             "report": report
