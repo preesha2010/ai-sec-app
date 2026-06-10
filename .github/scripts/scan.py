@@ -79,6 +79,7 @@ Also look for
 - SQL injection
 - Plaintext password storage
 - Missing authentication
+- Cross site scripting (XSS)
 
 Do not give generic advice not tied to the code.
 
@@ -92,7 +93,7 @@ Use this criteria to assign severity:
 - CRITICAL: At least one easily exploitable issue that can lead to full compromise with little or no authentication (e.g., unauthenticated admin access, remote code execution, SQL injection on login, etc.).
 - HIGH: Serious issues that can expose sensitive data or escalate privileges, but require some access/conditions (e.g., hardcoded admin credentials, plaintext or weakly hashed passwords, direct DB dumps).
 - MEDIUM: Issues that weaken security but are harder to exploit or have partial impact (e.g., using SHA-256 without salt for passwords, missing CSRF protection, missing logging on auth paths).
-- LOW: Primarily best-practice or defense-in-depth issues (e.g., missing security headers, overly verbose error messages, minor validation gaps).
+- LOW: Primarily OWASP best-practice or defense-in-depth issues (e.g., missing security headers, overly verbose error messages, minor validation gaps).
 
 At the end give an overall risk rating for the code based on highest severity found:
 RESULT: CRITICAL or
