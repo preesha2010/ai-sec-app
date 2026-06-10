@@ -77,7 +77,7 @@ def admin():
         return render_template("admin.html",granted=False,error=True)
     return render_template("admin.html",granted=False,error=False)
     
-# testing 123
+# testing
 
 if __name__ == "__main__":
     init_db()
