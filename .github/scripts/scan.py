@@ -53,10 +53,14 @@ print(f"Files to be scanned: {files}")
 code = read_code(files)
 
 prompt = f"""
-You are a security analyst reviewing code for vulnerabilities. 
-CODE: 
+You are a security analyst reviewing code for vulnerabilities for a Flask web application. You will receive one or more code files.  
+
+CODE TO REVIEW: 
 {code}
-Analyse the code for the following security vulnerabilities:
+
+Your job is to find concrete security vulnerabilities in this code and explain exactly how to fix them.
+
+Focus on:
 
 OWASP Top 10
 - Broken Access Control
@@ -76,20 +80,19 @@ Also look for
 - Plaintext password storage
 - Missing authentication
 
-Code:
-{code}
+Do not give generic advice not tied to the code.
 
-Respond in the following format for each vulnerabilty found:
+Respond exactly in the following format for each vulnerabilty found:
 Vulnerability: <name of vulnerability>
 Severity: <Critical/High/Medium/Low>
 - Risk: <brief explanation of the risk>
 - Mitigation: <specific fix>
 
 Use this criteria to assign severity:
-- CRITICAL: can be exploited remotely with no authentication, leads to full compromise (e.g. SQL injection, remote code execution)
-- HIGH: serious risk, requires some access or conditions to exploit (e.g. hardcoded admin credentials, plaintext passwords)
-- MEDIUM: limited impact or harder to exploit (e.g. debug mode on, missing rate limiting)
-- LOW: best practice violations, minimal direct risk (e.g. verbose error messages, missing logging)
+- CRITICAL: At least one easily exploitable issue that can lead to full compromise with little or no authentication (e.g., unauthenticated admin access, remote code execution, SQL injection on login, etc.).
+- HIGH: Serious issues that can expose sensitive data or escalate privileges, but require some access/conditions (e.g., hardcoded admin credentials, plaintext or weakly hashed passwords, direct DB dumps).
+- MEDIUM: Issues that weaken security but are harder to exploit or have partial impact (e.g., using SHA-256 without salt for passwords, missing CSRF protection, missing logging on auth paths).
+- LOW: Primarily best-practice or defense-in-depth issues (e.g., missing security headers, overly verbose error messages, minor validation gaps).
 
 At the end give an overall risk rating for the code based on highest severity found:
 RESULT: CRITICAL or
