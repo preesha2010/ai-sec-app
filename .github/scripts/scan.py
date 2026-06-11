@@ -13,7 +13,7 @@ IST = timezone(timedelta(hours=5, minutes=30))
 def changed_files():
     # returns list of files changed in the last commit
     try: 
-        result = subprocess.run(["git", "diff", "--name-only", "HEAD~1", "HEAD"], capture_output=True, text=True, check=True) 
+        result = subprocess.run(["git", "diff", "--name-only", "HEAD~1", "HEAD"], capture_output=True, text=True) 
         files = result.stdout.strip().splitlines()
         
         files = [
@@ -141,7 +141,7 @@ def send_to_dashboard(risk_level, files_scanned, report):
             return
             
         # POST request to send report to dashboard with payload as JSON and a timeout of 10 seconds
-        response = requests.post(f"{dashboard_url}/api/report", json=payload, timeout=10)
+        response = requests.post(f"{dashboard_url}/api/report", json=payload, timeout=60)
         
         if response.status_code == 201:
             print("Results sent to dashboard.")
