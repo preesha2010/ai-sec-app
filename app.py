@@ -12,9 +12,6 @@ DATABASE = "users.db"   # database file name
 SECRET_KEY = os.getenv("SECRET_KEY")
 ADMIN_PASSWORD = os.getenv("ADMIN_PASSWORD")
 
-# SECRET_KEY = "hardcoded"    # hardcoded pswd
-# ADMIN_PASSWORD = "admin_123"
-
 def get_db():
     conn = sqlite3.connect(DATABASE)
     conn.row_factory = sqlite3.Row
@@ -65,6 +62,11 @@ def login():    # user login with form`
         return render_template("login.html",success=False,error=True)
     return render_template("login.html", success=False, error=False)
 
+@app.route("/admin")
+def admin():
+    return "Admin disabled"
+
+'''
 @app.route("/admin", methods=["GET", "POST"])
 def admin():
     if request.method == "POST":
@@ -76,9 +78,7 @@ def admin():
             return render_template("admin.html",granted=True,error=False,users=users)
         return render_template("admin.html",granted=False,error=True)
     return render_template("admin.html",granted=False,error=False)
-    
-# testing dashboard
-
+'''
 if __name__ == "__main__":
     init_db()
     app.run(host="0.0.0.0", port=5000, debug=False)
