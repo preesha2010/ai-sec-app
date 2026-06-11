@@ -62,11 +62,6 @@ def login():    # user login with form`
         return render_template("login.html",success=False,error=True)
     return render_template("login.html", success=False, error=False)
 
-@app.route("/admin")
-def admin():
-    return "Admin disabled"
-
-'''
 @app.route("/admin", methods=["GET", "POST"])
 def admin():
     if request.method == "POST":
@@ -78,7 +73,7 @@ def admin():
             return render_template("admin.html",granted=True,error=False,users=users)
         return render_template("admin.html",granted=False,error=True)
     return render_template("admin.html",granted=False,error=False)
-'''
+
 if __name__ == "__main__":
     init_db()
     app.run(host="0.0.0.0", port=5000, debug=False)
