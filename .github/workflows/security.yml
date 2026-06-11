@@ -3,7 +3,7 @@ name: AI Security scanner
 on: 
   push:
     branches: 
-      - "*"
+      - "**"
 
 jobs:
   scan:
