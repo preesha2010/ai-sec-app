@@ -12,21 +12,20 @@
             AI-assisted security scanning for CI/CD pipelines.
         </p>
 
+        <!-- TEST: unsafe echo of user input to check HTML scanning -->
+        <p class="subtitle">
+            Message preview: {{ request.args.get('msg') | safe }}
+        </p>
         <div style="display:flex; gap:12px; justify-content:center;">
-
             <a href="/login" style="flex:1; max-width:180px;">
                 <button>Sign In</button>
             </a>
-
             <a href="/register" style="flex:1; max-width:180px;">
                 <button style="background:white; color:#111111; border:1px solid #d1d5db;">
                     Create Account
                 </button>
             </a>
-
         </div>
-
     </div>
-
 </div>
 {% endblock %}

@@ -13,8 +13,9 @@ IST = timezone(timedelta(hours=5, minutes=30))
 def changed_files():
     # returns list of files changed in the last commit
     try: 
-        result = subprocess.run(["git", "diff", "--name-only", "HEAD~1", "HEAD"], capture_output=True, text=True) 
-        files = result.stdout.strip().split("\n")
+        result = subprocess.run(["git", "show", "--name-only", "--pretty=format:", "HEAD"], capture_output=True, text=True, check=True) 
+        files = result.stdout.strip().splitlines()
+        print("Raw changed files from git:", files)
         
         files = [
             f for f in files    
