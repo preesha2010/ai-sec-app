@@ -135,6 +135,7 @@ def send_to_dashboard(risk_level, files_scanned, report):
         payload = {
             "app_name": os.getenv("APP_NAME", "unknown"),
             "repo": os.getenv("GITHUB_REPOSITORY", "unknown"),
+            "branch": os.getenv("GITHUB_REF_NAME", "unknown"),
             "push_time": datetime.now(IST).strftime("%Y-%m-%d %H:%M:%S"),
             "risk_level": risk_level,
             "files_scanned": ", ".join(files_scanned),
