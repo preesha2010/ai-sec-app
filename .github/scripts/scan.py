@@ -83,17 +83,30 @@ Also look for
 
 Do not give generic advice not tied to the code.
 
+For each vulnerability, respond in the exact markdown format as below:
+
+| Vulnerability | Severity | Likelihood | Impact | Mitigation |
+|---|---|---|---|---|
+| <name> | <Critical/High/Medium/Low> | <High/Medium/Low> | <what happens if exploited> | <specific fix> |
+
 Respond exactly in the following format for each vulnerabilty found:
 Vulnerability: <name of vulnerability>
 Severity: <Critical/High/Medium/Low>
 - Risk: <brief explanation of the risk>
 - Mitigation: <specific fix>
 
-Use this criteria to assign severity:
+Use this criteria to assign severity (how serious is the risk if exploited):
 - CRITICAL: At least one easily exploitable issue that can lead to full compromise with little or no authentication (e.g., unauthenticated admin access, remote code execution, SQL injection on login, etc.).
 - HIGH: Serious issues that can expose sensitive data or escalate privileges, but require some access/conditions (e.g., hardcoded admin credentials, plaintext or weakly hashed passwords, direct DB dumps).
 - MEDIUM: Issues that weaken security but are harder to exploit or have partial impact (e.g., using SHA-256 without salt for passwords, missing CSRF protection, missing logging on auth paths).
 - LOW: Primarily OWASP best-practice or defense-in-depth issues (e.g., missing security headers, overly verbose error messages, minor validation gaps).
+
+Use this criteria to assign likelihood (how easy is the risk to exploit):
+- HIGH: trivial to exploit, no special access needed
+- MEDIUM: requires some knowledge or specific conditions
+- LOW: requires significant effort or insider access
+
+After the table add a brief summary paragraph.
 
 At the end give an overall risk rating for the code based on highest severity found:
 RESULT: CRITICAL or
