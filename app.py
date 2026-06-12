@@ -74,6 +74,8 @@ def admin():
         return render_template("admin.html",granted=False,error=True)
     return render_template("admin.html",granted=False,error=False)
 
+#testing
+
 if __name__ == "__main__":
     init_db()
     app.run(host="0.0.0.0", port=5000, debug=False)
