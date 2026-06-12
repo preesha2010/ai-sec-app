@@ -89,12 +89,6 @@ For each vulnerability, respond in the exact markdown format as below:
 |---|---|---|---|---|
 | <name> | <Critical/High/Medium/Low> | <High/Medium/Low> | <what happens if exploited> | <specific fix> |
 
-Respond exactly in the following format for each vulnerabilty found:
-Vulnerability: <name of vulnerability>
-Severity: <Critical/High/Medium/Low>
-- Risk: <brief explanation of the risk>
-- Mitigation: <specific fix>
-
 Use this criteria to assign severity (how serious is the risk if exploited):
 - CRITICAL: At least one easily exploitable issue that can lead to full compromise with little or no authentication (e.g., unauthenticated admin access, remote code execution, SQL injection on login, etc.).
 - HIGH: Serious issues that can expose sensitive data or escalate privileges, but require some access/conditions (e.g., hardcoded admin credentials, plaintext or weakly hashed passwords, direct DB dumps).
