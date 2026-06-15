@@ -74,7 +74,7 @@ def admin():
         return render_template("admin.html",granted=False,error=True)
     return render_template("admin.html",granted=False,error=False)
 
-# testing pipeline and dashboard
+# testing 
 
 
 if __name__ == "__main__":
