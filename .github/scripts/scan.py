@@ -173,3 +173,5 @@ if "RESULT: CRITICAL" in report or "RESULT: HIGH" in report:
 else:
     print("Scan complete.")
     sys.exit(0)
+
+# testing scan.py
