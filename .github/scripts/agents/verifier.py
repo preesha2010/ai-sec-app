@@ -16,6 +16,14 @@ Your ONLY JOB is to check the following reported vulnerabilities against the cod
 Reported vulnerabilities:
 {state['vulnerabilities']}
 
+STRICT RULES:
+1. You may ONLY confirm vulnerabilities that were already listed above. Do NOT introduce any new vulnerability that wasn't in the reported list.
+2. For each reported vulnerability, you MUST copy-paste the EXACT line(s) of code from ORIGINAL CODE that prove it is real, word for word, inside the Evidence field. If you cannot copy an exact snippet, you cannot confirm it.
+3. Before confirming anything, re-read ORIGINAL CODE one more time and ask: "does this exact pattern appear, character for character, in the code above?" If the answer is no, discard it.
+4. Do NOT use phrases like "throughout the codebase" or "in general" — every confirmed item must point to one specific snippet you can quote.
+5. Reading an environment variable (os.getenv) is NOT a hardcoded secret. Do not flag os.getenv calls as hardcoded credentials.
+6. Do not invent SQL injection, XSS, or missing security headers unless you can quote the exact code that handles SQL, HTML rendering, or HTTP responses.
+
 For each reported vulnerability, check it against the actual code:
 If it is a real confirmed issue, keep it and assign severity and likelihood.
 If it is not actually present in the code or is a false positive, remove it and briefly note why it was discarded. 
