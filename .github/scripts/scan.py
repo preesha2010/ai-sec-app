@@ -1,12 +1,9 @@
 import os
 import sys
-from groq import Groq
 import subprocess
 import requests
 from datetime import datetime, timedelta, timezone
-
-API_KEY = os.getenv("GROQ_API_KEY")
-client = Groq(api_key=API_KEY)
+from agents.graph import buildGraph
 
 IST = timezone(timedelta(hours=5, minutes=30))
 
@@ -52,77 +49,22 @@ if not files:
 print(f"Files to be scanned: {files}")
 code = read_code(files)
 
-prompt = f"""
-You are a security analyst reviewing code for vulnerabilities for a Flask web application. You will receive one or more code files.  
+#   connecting graph.py to scan.py
 
-CODE TO REVIEW: 
-{code}
+graph = buildGraph()
 
-Your job is to find concrete security vulnerabilities in this code and explain exactly how to fix them.
+initial_state = {
+    "code": code,
+    "files_scanned": files,
+    "vulnerabilities": "",
+    "verified_vulnerabilities": "",
+    "final_report": ""
+}
 
-Focus on:
+# LangGraph takes the initial state and sends it to the entry point, waits for the function to return updated state then passes updated state to next function cause of the edge that was defined
+result = graph.invoke(initial_state)
 
-OWASP Top 10
-- Broken Access Control
-- Security Misconfiguration
-- Software Supply Chain Failures
-- Cryptographic Failures
-- Injection
-- Insecure Design 
-- Authentication Failures
-- Software and Data Integrity Failures
-- Security Logging and Alerting Failures
-- Mishandling of Exceptional Conditions
-
-Also look for
-- Hardcoded passwords
-- SQL injection
-- Plaintext password storage
-- Missing authentication
-- Cross site scripting (XSS)
-
-Do not give generic advice not tied to the code.
-
-For each vulnerability, respond in the exact markdown format as below:
-
-| Vulnerability | Severity | Likelihood | Impact | Mitigation |
-|---|---|---|---|---|
-| <name> | <Critical/High/Medium/Low> | <High/Medium/Low> | <what happens if exploited> | <specific fix> |
-
-Use this criteria to assign severity (how serious is the risk if exploited):
-- CRITICAL: At least one easily exploitable issue that can lead to full compromise with little or no authentication (e.g., unauthenticated admin access, remote code execution, SQL injection on login, etc.).
-- HIGH: Serious issues that can expose sensitive data or escalate privileges, but require some access/conditions (e.g., hardcoded admin credentials, plaintext or weakly hashed passwords, direct DB dumps).
-- MEDIUM: Issues that weaken security but are harder to exploit or have partial impact (e.g., using SHA-256 without salt for passwords, missing CSRF protection, missing logging on auth paths).
-- LOW: Primarily OWASP best-practice or defense-in-depth issues (e.g., missing security headers, overly verbose error messages, minor validation gaps).
-
-Use this criteria to assign likelihood (how easy is the risk to exploit):
-- HIGH: trivial to exploit, no special access needed
-- MEDIUM: requires some knowledge or specific conditions
-- LOW: requires significant effort or insider access
-
-After the table add a brief summary paragraph.
-
-At the end give an overall risk rating for the code based on highest severity found:
-RESULT: CRITICAL or
-RESULT: HIGH or
-RESULT: MEDIUM or
-RESULT: LOW or
-RESULT: NONE
-"""
-
-response = client.chat.completions.create(
-    model="llama-3.3-70b-versatile",
-    messages=[
-        {
-            "role": "user",
-            "content": prompt
-        }
-    ],
-    temperature=0,
-    max_tokens=1024
-)
-
-report =  response.choices[0].message.content
+report = result["final_report"]
 
 with open("security_report.md", "w") as file:
     file.write(report)      # saving report to md file 
