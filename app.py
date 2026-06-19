@@ -74,8 +74,7 @@ def admin():
         return render_template("admin.html",granted=False,error=True)
     return render_template("admin.html",granted=False,error=False)
 
-# testing after table reset
-
+# testing new prompt accuracy
 
 if __name__ == "__main__":
     init_db()
