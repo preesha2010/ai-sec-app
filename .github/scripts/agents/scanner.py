@@ -6,16 +6,26 @@ llm = ChatGroq(model="llama-3.3-70b-versatile", temperature=0, api_key=API_KEY)
 
 def scanner_node(state):
     prompt = f"""
-You are a security analyst reviewing code for vulnerabilities for a Flask web application. You will receive one or more code files.  
+You are a security analyst reviewing code for vulnerabilities for a web application. You will receive one or more code files. Your job is to find concrete security vulnerabilities in this code.  
 
 CODE TO REVIEW: 
 {state['code']}
 
-Your job is to find concrete security vulnerabilities in this code.
+
+A vulnerability can come from two kinds of evidence:
+PRESENCE - a specific line or pattern of code that directly causes the issue (e.g. string-concatenated SQL queries, a plaintext password comparison).
+ABSENCE - a required protection that is missing across the relevant code (e.g. no input validation on a form handler, no rate limiting on a login route, no CSRF protection anywhere forms are processed). For absence-based findings, you must specify exactly what you checked for and where, not just assert the codebase "lacks security."
+
+
+PROCESS:
+1. Read through the entire code and identify either specific risky code, or specific missing protections, using the two evidence types above.
+2. For PRESENCE findings, note the exact code responsible.
+3. For ABSENCE findings, name the specific function(s) or code path(s) where the missing protection would be expected, and confirm you checked and it is not there.
+4. Do not search for a vulnerability in every category below just to have something to report. Many categories may genuinely not apply to this code - that is a normal and expected outcome, not a failure.
 
 Focus on:
 
-OWASP Top 10
+OWASP Top 10 vulnerabilities
 - Broken Access Control
 - Security Misconfiguration
 - Software Supply Chain Failures
@@ -33,6 +43,9 @@ Also look for
 - Plaintext password storage
 - Missing authentication
 - Cross site scripting (XSS)
+
+Do not flag a vulnerability type for functionality the code doesn't have. For example, do not flag SQL injection if there is no database query in the code, and do not flag XSS if there is no HTML rendering or web output, and do not flag missing CSRF protection if there are no forms or state-changing web requests at all.
+Standard secure practices are not vulnerabilities. Reading secrets via environment variables, using parameterized queries, or using well-known libraries in their default secure configuration should NOT be flagged.
 
 Do not give mitigations or fixes. That is not your job. It is a separate step later. 
 Do not give generic advice not tied to the code.

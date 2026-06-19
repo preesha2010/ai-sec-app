@@ -16,23 +16,28 @@ Your ONLY JOB is to check the following reported vulnerabilities against the cod
 Reported vulnerabilities:
 {state['vulnerabilities']}
 
-STRICT RULES:
-1. You may ONLY confirm vulnerabilities that were already listed above. Do NOT introduce any new vulnerability that wasn't in the reported list.
-2. For each reported vulnerability, you MUST copy-paste the EXACT line(s) of code from ORIGINAL CODE that prove it is real, word for word, inside the Evidence field. If you cannot copy an exact snippet, you cannot confirm it.
-3. Before confirming anything, re-read ORIGINAL CODE one more time and ask: "does this exact pattern appear, character for character, in the code above?" If the answer is no, discard it.
-4. Do NOT use phrases like "throughout the codebase" or "in general" — every confirmed item must point to one specific snippet you can quote.
-5. Reading an environment variable (os.getenv) is NOT a hardcoded secret. Do not flag os.getenv calls as hardcoded credentials.
-6. Do not invent SQL injection, XSS, or missing security headers unless you can quote the exact code that handles SQL, HTML rendering, or HTTP responses.
+PROCESS — follow these steps in order for EACH reported vulnerability:
+STEP 1 — Locate: Find the exact line(s) in ORIGINAL CODE that the analyst is referring to. Copy that exact snippet.
+STEP 2 — Verify: Does the snippet you copied actually demonstrate the claimed vulnerability, or did the analyst misread/assume something not actually present?
+STEP 3 — Decide: 
+   - CONFIRM only if you copied a real snippet in Step 1 AND it genuinely demonstrates the vulnerability in Step 2.
+   - DISCARD if you cannot find a matching snippet, or the snippet doesn't actually prove the claim, or the analyst is describing a vulnerability type that doesn't apply to what this code actually does (e.g. flagging a database-only vulnerability in code with no database, or a web-rendering vulnerability in code with no HTML output).
 
-For each reported vulnerability, check it against the actual code:
-If it is a real confirmed issue, keep it and assign severity and likelihood.
-If it is not actually present in the code or is a false positive, remove it and briefly note why it was discarded. 
+HARD CONSTRAINTS:
+- You may only evaluate vulnerabilities that appear in the REPORTED VULNERABILITIES list above. Do not add anything new.
+- Standard security practices (using parameterized queries, reading secrets from environment variables, using HTTPS libraries by default) are NOT vulnerabilities. Only flag the ABSENCE or MISUSE of these practices, not their use.
+
+EVIDENCE TYPES (use whichever applies):
+- LINE-LEVEL: copy the exact line(s) of code that directly demonstrate the issue.
+- ABSENCE/PATTERN-LEVEL: if the vulnerability is the absence of a protection (e.g. no input validation, no rate limiting, no CSRF protection) or spans multiple locations, instead describe specifically what you searched for and confirm it does not appear anywhere in CODE TO REVIEW, and name the relevant function(s) or file(s) where you'd expect to find it.
+
+Do not confirm a vulnerability using vague language like "the codebase lacks security" — even an absence-based finding must be specific about what is missing and where you checked.
 
 Use this criteria to assign severity (how serious is the risk if exploited):
-- CRITICAL: At least one easily exploitable issue that can lead to full compromise with little or no authentication (e.g., unauthenticated admin access, remote code execution, SQL injection on login, etc.).
+- CRITICAL: Easily exploitable, leads to full compromise, little or no authentication (e.g., unauthenticated admin access, remote code execution, SQL injection on login, etc.).
 - HIGH: Serious issues that can expose sensitive data or escalate privileges, but require some access/conditions (e.g., hardcoded admin credentials, plaintext or weakly hashed passwords, direct DB dumps).
 - MEDIUM: Issues that weaken security but are harder to exploit or have partial impact (e.g., using SHA-256 without salt for passwords, missing CSRF protection, missing logging on auth paths).
-- LOW: Primarily OWASP best-practice or defense-in-depth issues (e.g., missing security headers, overly verbose error messages, minor validation gaps).
+- LOW: Primarily OWASP best-practice or defense-in-depth gaps (e.g., missing security headers, overly verbose error messages, minor validation gaps).
 
 Use this criteria to assign likelihood (how easy is the risk to exploit):
 - HIGH: trivial to exploit, no special access needed
@@ -47,9 +52,9 @@ Likelihood: <level>
 Location: <where in code>
 Risk: <why this matters>
 
-If any vulnerabilites were discarded, list them out in the end.
+At the end, list discarded vulnerabilities under 'DISCARDED (false positives)' with a one-liner reason each, referencing the step they failed at. 
 
-Do not give mitigations or fixes. That is not your job. There is a separate step for that. 
+Do not give mitigations or fixes. That is a separate step later. 
 """
     response = llm.invoke(prompt)
     state["verified_vulnerabilities"] = response.content
