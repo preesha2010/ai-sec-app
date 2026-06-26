@@ -58,6 +58,7 @@ initial_state = {
     "files_scanned": files,
     "vulnerabilities": "",
     "verified_vulnerabilities": "",
+    "feedback": "",
     "final_report": ""
 }
 
@@ -70,6 +71,22 @@ with open("security_report.md", "w") as file:
     file.write(report)      # saving report to md file 
 
 print(report)
+
+print("\n[AGENT 1 — SCANNER]")
+print("Job: Find candidate vulnerabilities")
+print(result["vulnerabilities"])
+
+print("\n[AGENT 2 — VERIFIER]")
+print("Job: Cross-check findings against actual code")
+print(result["verified_vulnerabilities"])
+
+print("\n[AGENT 3 — FEEDBACK]")
+print("Job: Filter false positives, escalate recurring issues")
+print(result["feedback"])
+
+print("\n[AGENT 4 — MITIGATOR]")
+print("Job: Write mitigations for processed findings")
+print(result["final_report"])
 
 # sending results to dashboard
 def send_to_dashboard(risk_level, files_scanned, report):

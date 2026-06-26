@@ -8,8 +8,14 @@ def mitigator_node(state):
     prompt = f"""
 You are a security engineer. Below are confirmed vulnerbailities, already verified against the code. For each one, provide a specific and actionable mitigation. 
 
-Vulnerabilities found :
-{state['verified_vulnerabilities']}
+Findings after feedback processing:
+{state['feedback']}
+
+
+These findings are the result of a multi-agent pipeline:
+- A scanner identified candidate vulnerabilities
+- A verifier confirmed them against the actual code
+- A feedback agent filtered false positives and escalated recurring issues
 
 For each vulnerability, respond in the exact markdown format as below:
 
@@ -17,7 +23,7 @@ For each vulnerability, respond in the exact markdown format as below:
 |---|---|---|---|---|
 | <name> | <Critical/High/Medium/Low> | <High/Medium/Low> | <what happens if exploited> | <specific fix> |
 
-After the end of the table add a brief summary paragraph.
+After the table, add a brief summary. If any findings were escalated due to being recurring and unresolved, explicitly call them out as requiring urgent attention since they have persisted across multiple scans.
 
 At the end give an overall risk rating for the code based on highest severity found:
 RESULT: CRITICAL or
