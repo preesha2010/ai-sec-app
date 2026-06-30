@@ -30,7 +30,7 @@ def feedback_node(state):
             history_text = f"Could not retrieve history: {e}"
 
     prompt = f"""
-You are a feedback analyst in a security scanning pipeline. Your job is to compare current verified findings against this app's historical scan data and annotate each finding with a confidence level.
+You are a feedback analyst in a security scanning pipeline. Your job is to compare current verified findings against this app's historical scan data and improve the quality of the current scan by identifying trends and unresolved vulnerabilities. 
 
 CURRENT VERIFIED FINDINGS:
 {state['verified_vulnerabilities']}
@@ -38,44 +38,61 @@ CURRENT VERIFIED FINDINGS:
 HISTORICAL SCAN DATA FOR THIS APP:
 {history_text}
 
-You must do two things:
+TASK 1 — HISTORY ANALYSIS:
+For every current verified finding, classify it as one of the following:
 
-TASK 1 — FILTER (remove false positives):
-A finding is likely a false positive if:
-- It appeared in only one previous scan and never again across multiple scans
-- It is not present in any previous scan history at all AND is a very unlikely vulnerability given the code context described
+• NEW - no matching mention found in any historical scan above. Pass through unchanged.
 
-TASK 2 — ESCALATE (increase severity of recurring unresolved issues):
-A finding should be escalated if:
-- It has appeared in 2 or more previous scans
-- It is still present in the current scan
-- This means it has not been fixed despite being flagged before
+• RECURRING - matches a finding in exactly one historical scan and is still present.
 
-For escalated findings, increase their severity by one level:
+• PERSISTENT
+  - The vulnerability has appeared in two or more previous scans and is still unresolved.
+  - Persistent vulnerabilities indicate that previous remediation attempts were unsuccessful or the issue has been ignored.
+
+TASK 2 — PRIORITY ESCALATION:
+Escalate ONLY persistent vulnerabilities. 
+
+Increase their severity by one level:
 LOW → MEDIUM
 MEDIUM → HIGH
 HIGH → CRITICAL
 
+Do NOT escalate CRITICAL vulnerabilities. 
+
+Do NOT change severity of NEW or RECURRING findings. 
+
+Do NOT remove findings simply because they do not exist in historical scans.
+
+A vulnerability appearing for the first time should be classified as NEW and passed through unchanged.
+
+Only modify the Severity field when a finding qualifies for escalation.
+
 STRICT RULES:
-1. If there is no history, pass all findings through unchanged - you cannot filter or escalate without evidence.
-2. Do not invent new findings.
-3. Do not add findings that were not in CURRENT VERIFIED FINDINGS.
-4. Base all decisions strictly on what the historical data actually shows.
-5. Do not suggest mitigations — that is the next agent's job.
+1. If no historical scan data exists, classify every finding as NEW.
+2. Never invent new vulnerabilities.
+3. Never delete or ignore verified findings.
+4. Never change file paths, vulnerability names, likelihood, risk descriptions, or locations.
+5. Only modify Severity when escalation rules apply.
+6. Do not suggest mitigations.
+7. Base every decision strictly on the historical scan data provided.
 
-Output each finding in this exact format:
+For every finding output exactly:
+Vulnerability: <copy exactly from verified vulnerabilities>
+Severity: <original severity OR escalated severity>
+Likelihood: <level from verified vulnerabilities>
+Location: <location from verified vulnerabilities>
+Risk: <risk from verified vulnerabilities>
+History Status: <NEW / RECURRING / PERSISTENT>
+Feedback Action: <PASSED THROUGH / ESCALATED from X to Y>
+Reason: <One brief sentence explaining the decision using the historical scan data.>
 
-Vulnerability: <name>
-Severity: <level - escalated if applicable>
-Likelihood: <level from verified findings>
-Location: <location from verified findings>
-Risk: <risk from verified findings>
-Feedback Action: <PASSED THROUGH / ESCALATED from X to Y / REMOVED as likely false positive>
-Reason: <one sentence explaining the decision based on history>
+Finally output:
 
-At the end list any removed findings under: 
-Removed Findings: <name> - <reason>
-
+Summary
+New Findings: <number>
+Recurring Findings: <number>
+Persistent Findings: <number>
+Escalated Findings: <number>
 """
     response = llm.invoke(prompt)
     state["feedback"] = response.content

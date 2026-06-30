@@ -11,21 +11,20 @@ You are a security engineer. Below are confirmed vulnerbailities, already verifi
 Findings after feedback processing:
 {state['feedback']}
 
-
 These findings are the result of a multi-agent pipeline:
 - A scanner identified candidate vulnerabilities
 - A verifier confirmed them against the actual code
-- A feedback agent filtered false positives and escalated recurring issues
+- A feedback agent compared them against this app's scan history, classified each as NEW, RECURRING, or PERSISTENT, and escalated severity for PERSISTENT findings that remain unresolved
 
 For each vulnerability, respond in the exact markdown format as below:
 
-| Vulnerability | Severity | Likelihood | Impact | Mitigation |
-|---|---|---|---|---|
-| <name> | <Critical/High/Medium/Low> | <High/Medium/Low> | <what happens if exploited> | <specific fix> |
+| Vulnerability | Severity | Likelihood | History | Impact | Mitigation |
+|---|---|---|---|---|---|
+| <name> | <Critical/High/Medium/Low> | <High/Medium/Low> | <NEW/RECURRING/PERSISTENT> | <what happens if exploited> | <specific fix> |
 
-After the table, add a brief summary. If any findings were escalated due to being recurring and unresolved, explicitly call them out as requiring urgent attention since they have persisted across multiple scans.
+After the table, add a brief summary. If any findings are marked PERSISTENT, explicitly call them out by name in a separate short paragraph titled "Unresolved Issues Requiring Urgent Attention" — note that these have remained unfixed across multiple scans and previous mitigation guidance has not been acted on.
 
-At the end give an overall risk rating for the code based on highest severity found:
+At the end give an overall risk rating for the code based on the highest severity found in the table above:
 RESULT: CRITICAL or
 RESULT: HIGH or
 RESULT: MEDIUM or
