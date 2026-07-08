@@ -76,6 +76,10 @@ def scanner_node(state):
     response = llm.invoke(prompt)
     output = response.content
 
+    print("\n========== RAW SCANNER OUTPUT ==========\n")
+    print(output)
+    print("\n========================================\n")
+
     metrics = extract_scanner_metrics(output)
 
     state["vulnerabilities"] = output
