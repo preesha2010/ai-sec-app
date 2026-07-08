@@ -46,6 +46,35 @@ Standard secure practices are not vulnerabilities. Reading secrets via environme
 
 Do not give mitigations or fixes. That is not your job. It is a separate step later. 
 Do not give generic advice not tied to the code.
+
+OUTPUT FORMAT
+
+For every vulnerability, output EXACTLY in this format:
+
+Vulnerability: <name>
+Evidence Type: <Presence or Absence>
+Location: <specific line, function, or checked code path>
+Description: <why this is a vulnerability>
+
+Repeat this block for every vulnerability.
+
+If no vulnerabilities exist, output exactly:
+
+No vulnerabilities identified.
+
+Do NOT output:
+- numbered lists
+- bullet points
+- markdown headings
+- recommendations
+- mitigations
+- fixes
+- summaries
+- introductory text
+- concluding text
+
+Your output should contain ONLY the vulnerability blocks shown above.
+
 """
 
 def extract_scanner_metrics(output_text):
@@ -75,10 +104,6 @@ def scanner_node(state):
     prompt = SCANNER_PROMPT_TEMPLATE.format(code=state["code"])
     response = llm.invoke(prompt)
     output = response.content
-
-    print("\n========== RAW SCANNER OUTPUT ==========\n")
-    print(output)
-    print("\n========================================\n")
 
     metrics = extract_scanner_metrics(output)
 
