@@ -1,33 +1,25 @@
 import os
-import requests
 from langchain_groq import ChatGroq
 
 API_KEY = os.getenv("GROQ_API_KEY")
 llm = ChatGroq(model="llama-3.3-70b-versatile", temperature=0, api_key=API_KEY)
 
 def feedback_node(state):
-    app_name = os.getenv("APP_NAME", "unknown")
-    dashboard_url = os.getenv("DASHBOARD_URL","")
 
-    # fetching past scan history from dashboard
-    history_text = "No previous scan history available"
-    if dashboard_url:
-        try:
-            response = requests.get(
-                f"{dashboard_url}/api/history/{app_name}",
-                timeout=10
+    history = state.get("history", [])
+
+    if history:
+        history_text = f"Previous {len(history)} scan(s) found:\n"
+
+        for i, scan in enumerate(history, 1):
+            history_text += (
+                f"\nScan {i} "
+                f"({scan.get('scan_time')}) "
+                f"— {scan.get('risk_level')}:\n"
+                f"{scan.get('report','')[:800]}\n"
             )
-            if response.status_code == 200:
-                scans = response.json()
-                if scans:
-                    history_text = f"Previous {len(scans)} scan(s) found:\n"
-                    for i, scan in enumerate(scans, 1):
-                        history_text += f"\nScan {i} ({scan['scan_time']}) — {scan['risk_level']}:\n{scan['report'][:800]}\n"
-                else:
-                    history_text = "No previous scans found for this app."
-
-        except Exception as e:
-            history_text = f"Could not retrieve history: {e}"
+    else:
+        history_text = "No previous scan history available."
 
     prompt = f"""
 You are a feedback analyst in a security scanning pipeline. Your job is to compare current verified findings against this app's historical scan data and improve the quality of the current scan by identifying trends and unresolved vulnerabilities. 

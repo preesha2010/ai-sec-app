@@ -32,5 +32,57 @@ RESULT: LOW or
 RESULT: NONE
 """
     response = llm.invoke(prompt)
-    state["final_report"] = response.content
+    output = response.content
+
+    metrics = extract_mitigator_metrics(output)
+
+    state["final_report"] = output
+    state["mitigator_metrics"] = metrics
     return state
+
+def extract_mitigator_metrics(report_text):
+    finding_count = 0
+    persistent_count = 0
+    overall_risk = "UNKNOWN"
+
+    in_table = False
+
+    for line in report_text.splitlines():
+        stripped = line.strip()
+
+        # Detect markdown table
+        if stripped.startswith("| Vulnerability"):
+            in_table = True
+            continue
+
+        # Skip separator row
+        if in_table and "---" in stripped:
+            continue
+
+        # Count findings and persistent issues
+        if in_table:
+            if stripped.startswith("|"):
+                cols = [c.strip() for c in stripped.strip("|").split("|")]
+
+                # End of table
+                if len(cols) < 6:
+                    in_table = False
+                    continue
+
+                finding_count += 1
+
+                history = cols[3].upper()
+                if history == "PERSISTENT":
+                    persistent_count += 1
+            else:
+                in_table = False
+
+        # Overall risk
+        if stripped.startswith("RESULT:"):
+            overall_risk = stripped.replace("RESULT:", "").strip().upper()
+
+    return {
+        "finding_count": finding_count,
+        "persistent_count": persistent_count,
+        "overall_risk": overall_risk,
+    }

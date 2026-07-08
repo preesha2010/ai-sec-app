@@ -4,17 +4,16 @@ from langchain_groq import ChatGroq
 API_KEY = os.getenv("GROQ_API_KEY")
 llm = ChatGroq(model="llama-3.3-70b-versatile", temperature=0, api_key=API_KEY)
 
-def verifier_node(state):
-    prompt = f"""
+VERIFIER_PROMPT_TEMPLATE = """
 You are a senior security reviewer. A junior analyst found the following potential vulnerabilities in this code. 
 
 Original code:
-{state['code']}
+{code}
 
 Your ONLY JOB is to check the following reported vulnerabilities against the code.
 
 Reported vulnerabilities:
-{state['vulnerabilities']}
+{vulnerabilities}
 
 PROCESS — follow these steps in order for EACH reported vulnerability:
 STEP 1 — Locate: Find the exact line(s) in ORIGINAL CODE that the analyst is referring to. Copy that exact snippet.
@@ -56,6 +55,70 @@ At the end, list discarded vulnerabilities under 'DISCARDED (false positives)' w
 
 Do not give mitigations or fixes. That is a separate step later. 
 """
+
+def extract_verifier_metrics(output_text, scanner_count):
+    confirmed_count = 0
+    discarded_count = 0
+
+    severity_distribution = {
+        "CRITICAL": 0,
+        "HIGH": 0,
+        "MEDIUM": 0,
+        "LOW": 0,
+    }
+
+    verified_names = []
+
+    in_discarded_section = False
+
+    for line in output_text.splitlines():
+        line = line.strip()
+
+        if "DISCARDED" in line.upper() and "FALSE" in line.upper():
+            in_discarded_section = True
+            continue
+
+        if line.startswith("Vulnerability:"):
+            name = line.replace("Vulnerability:", "").strip()
+            if in_discarded_section:
+                discarded_count += 1
+            else:
+                confirmed_count += 1
+                verified_names.append(name)
+
+        elif line.startswith("Severity:") and not in_discarded_section:
+            severity = line.replace("Severity:", "").strip().upper()
+            if severity in severity_distribution:
+                severity_distribution[severity] += 1
+
+    verification_rate = (
+        round(confirmed_count / scanner_count, 2)
+        if scanner_count > 0
+        else 0
+    )
+
+    return {
+        "confirmed_count": confirmed_count,
+        "discarded_count": discarded_count,
+        "verification_rate": verification_rate,
+        "severity_distribution": severity_distribution,
+        "verified_names": verified_names,
+    }
+
+def verifier_node(state):
+    prompt = VERIFIER_PROMPT_TEMPLATE.format(
+        code=state["code"],
+        vulnerabilities=state["vulnerabilities"]
+    )
     response = llm.invoke(prompt)
-    state["verified_vulnerabilities"] = response.content
-    return state
+    output = response.content
+
+    scanner_count = state.get("scanner_metrics", {}).get("candidate_count", 1)
+    metrics = extract_verifier_metrics(output, scanner_count)
+
+    state["verified_vulnerabilities"] = output
+    state["verifier_metrics"] = metrics
+    state["verifier_prompt"] = VERIFIER_PROMPT_TEMPLATE  # store prompt version so that Supervisor can later evaluate prompt quality
+
+    print(f"Verifier confirmed {metrics['confirmed_count']}, discarded {metrics['discarded_count']}")
+    return state    

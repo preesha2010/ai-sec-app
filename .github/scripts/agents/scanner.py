@@ -4,18 +4,15 @@ from langchain_groq import ChatGroq
 API_KEY = os.getenv("GROQ_API_KEY")
 llm = ChatGroq(model="llama-3.3-70b-versatile", temperature=0, api_key=API_KEY)
 
-def scanner_node(state):
-    prompt = f"""
+SCANNER_PROMPT_TEMPLATE = """
 You are a security analyst reviewing code for vulnerabilities for a web application. You will receive one or more code files. Your job is to find concrete security vulnerabilities in this code.  
 
 CODE TO REVIEW: 
-{state['code']}
-
+{code}
 
 A vulnerability can come from two kinds of evidence:
 PRESENCE - a specific line or pattern of code that directly causes the issue (e.g. string-concatenated SQL queries, a plaintext password comparison).
 ABSENCE - a required protection that is missing across the relevant code (e.g. no input validation on a form handler, no rate limiting on a login route, no CSRF protection anywhere forms are processed). For absence-based findings, you must specify exactly what you checked for and where, not just assert the codebase "lacks security."
-
 
 PROCESS:
 1. Read through the entire code and identify either specific risky code, or specific missing protections, using the two evidence types above.
@@ -50,7 +47,41 @@ Standard secure practices are not vulnerabilities. Reading secrets via environme
 Do not give mitigations or fixes. That is not your job. It is a separate step later. 
 Do not give generic advice not tied to the code.
 """
-    response = llm.invoke(prompt)
-    state["vulnerabilities"] = response.content
-    return state
 
+def extract_scanner_metrics(output_text):
+    vulnerabilities = []
+    current = {}
+    for line in output_text.splitlines():
+        line = line.strip()
+        if line.startswith("Vulnerability:"):
+            if current:
+                vulnerabilities.append(current)
+            current = {"name": line.replace("Vulnerability:", "").strip()}
+        elif line.startswith("Evidence Type:") and current:
+            current["evidence_type"] = line.replace("Evidence Type:", "").strip()
+        elif line.startswith("Location:") and current:
+            current["location"] = line.replace("Location:", "").strip()
+    if current:
+        vulnerabilities.append(current)
+
+    return {
+        "candidate_count": len(vulnerabilities),
+        "presence_count": sum(1 for v in vulnerabilities if v.get("evidence_type", "").lower() == "presence"),
+        "absence_count": sum(1 for v in vulnerabilities if v.get("evidence_type", "").lower() == "absence"),
+        "vulnerability_names": [v.get("name", "") for v in vulnerabilities],
+    }
+
+def scanner_node(state):
+    prompt = SCANNER_PROMPT_TEMPLATE.format(code=state["code"])
+    response = llm.invoke(prompt)
+    output = response.content
+
+    metrics = extract_scanner_metrics(output)
+
+    state["vulnerabilities"] = output
+    state["scanner_metrics"] = metrics
+    state["scanner_prompt"] = SCANNER_PROMPT_TEMPLATE  # store prompt version so that Supervisor can later evaluate prompt quality
+
+    print(f"Scanner found {metrics['candidate_count']} candidate vulnerabilities")
+
+    return state
