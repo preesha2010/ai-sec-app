@@ -1,4 +1,5 @@
 import os
+import re
 from langchain_groq import ChatGroq
 
 API_KEY = os.getenv("GROQ_API_KEY")
@@ -74,22 +75,24 @@ def extract_verifier_metrics(output_text, scanner_count):
     for line in output_text.splitlines():
         line = line.strip()
 
-        if "DISCARDED" in line.upper() and "FALSE" in line.upper():
+        if "DISCARDED" in line.upper():
             in_discarded_section = True
             continue
 
-        if line.startswith("Vulnerability:"):
-            name = line.replace("Vulnerability:", "").strip()
+        vuln_match = re.search(r"Vulnerability:\s*(.+)", line)
+        if vuln_match:
+            name = vuln_match.group(1).replace("*", "").strip()
+
             if in_discarded_section:
                 discarded_count += 1
             else:
                 confirmed_count += 1
                 verified_names.append(name)
 
-        elif line.startswith("Severity:") and not in_discarded_section:
-            severity = line.replace("Severity:", "").strip().upper()
-            if severity in severity_distribution:
-                severity_distribution[severity] += 1
+        severity_match = re.search(r"Severity:\s*(CRITICAL|HIGH|MEDIUM|LOW)", line, re.IGNORECASE)
+        if severity_match and not in_discarded_section:
+            severity = severity_match.group(1).upper()
+            severity_distribution[severity] += 1
 
     verification_rate = (
         round(confirmed_count / scanner_count, 2)
