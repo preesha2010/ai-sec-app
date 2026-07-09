@@ -93,6 +93,12 @@ def extract_scanner_metrics(output_text):
     if current:
         vulnerabilities.append(current)
 
+    unique = {}
+    for v in vulnerabilities:
+        unique[v["name"]] = v      # keeps one entry per vulnerability name
+
+    vulnerabilities = list(unique.values())
+
     return {
         "candidate_count": len(vulnerabilities),
         "presence_count": sum(1 for v in vulnerabilities if v.get("evidence_type", "").lower() == "presence"),

@@ -94,6 +94,9 @@ def extract_verifier_metrics(output_text, scanner_count):
             severity = severity_match.group(1).upper()
             severity_distribution[severity] += 1
 
+    verified_names = list(dict.fromkeys(verified_names))
+    confirmed_count = len(verified_names)
+
     verification_rate = (
         round(confirmed_count / scanner_count, 2)
         if scanner_count > 0
