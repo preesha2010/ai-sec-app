@@ -16,7 +16,7 @@ Your ONLY JOB is to check the following reported vulnerabilities against the cod
 Reported vulnerabilities:
 {vulnerabilities}
 
-PROCESS — follow these steps in order for EACH reported vulnerability:
+PROCESS — follow these steps in order for EACH reported vulnerability but DO NOT DISPLAY IN OUTPUT:
 STEP 1 — Locate: Find the exact line(s) in ORIGINAL CODE that the analyst is referring to. Copy that exact snippet.
 STEP 2 — Verify: Does the snippet you copied actually demonstrate the claimed vulnerability, or did the analyst misread/assume something not actually present?
 STEP 3 — Decide: 
@@ -44,7 +44,7 @@ Use this criteria to assign likelihood (how easy is the risk to exploit):
 - MEDIUM: requires some knowledge or specific conditions
 - LOW: requires significant effort or insider access
 
-Output only confirmed vulnerabilites with their severity and likelihood in the following format:
+Your final output should begin immediately with confirmed vulnerabilites with their severity and likelihood in the following format:
 
 Vulnerability: <name>
 Severity: <level>
@@ -52,13 +52,15 @@ Likelihood: <level>
 Location: <where in code>
 Risk: <why this matters>
 
-At the end, list discarded vulnerabilities under 'DISCARDED (false positives)' with a one-liner reason each, referencing the step they failed at. 
+At the end list ONLY the names of discarded vulnerabilities under:
+
+DISCARDED:
+- <vulnerability name>: <one line reason> 
 
 Do not give mitigations or fixes. That is a separate step later. 
 """
 
 def extract_verifier_metrics(output_text, scanner_count):
-    confirmed_count = 0
     discarded_count = 0
 
     severity_distribution = {
@@ -69,30 +71,28 @@ def extract_verifier_metrics(output_text, scanner_count):
     }
 
     verified_names = []
-
     in_discarded_section = False
 
     for line in output_text.splitlines():
         line = line.strip()
 
-        if "DISCARDED" in line.upper():
+        if line.upper().startswith("DISCARDED"):
             in_discarded_section = True
             continue
 
-        vuln_match = re.search(r"Vulnerability:\s*(.+)", line)
-        if vuln_match:
-            name = vuln_match.group(1).replace("*", "").strip()
-
-            if in_discarded_section:
-                discarded_count += 1
-            else:
-                confirmed_count += 1
+        if not in_discarded_section:
+            vuln_match = re.search(r"Vulnerability:\s*(.+)", line)
+            if vuln_match:
+                name = vuln_match.group(1).replace("*", "").strip()
                 verified_names.append(name)
 
-        severity_match = re.search(r"Severity:\s*(CRITICAL|HIGH|MEDIUM|LOW)", line, re.IGNORECASE)
-        if severity_match and not in_discarded_section:
-            severity = severity_match.group(1).upper()
-            severity_distribution[severity] += 1
+            severity_match = re.search(r"Severity:\s*(CRITICAL|HIGH|MEDIUM|LOW)", line, re.IGNORECASE)
+            if severity_match:
+                severity = severity_match.group(1).upper()
+                severity_distribution[severity] += 1
+        else:
+            if line.startswith("-"):
+                discarded_count += 1
 
     verified_names = list(dict.fromkeys(verified_names))
     confirmed_count = len(verified_names)
