@@ -73,6 +73,11 @@ Do NOT output:
 - introductory text
 - concluding text
 
+Do NOT output a DISCARDED section.
+Do NOT list categories you checked and ruled out.
+If a vulnerability category does not apply, simply do not mention it.
+Only output vulnerabilities you actually found.
+
 Your output should contain ONLY the vulnerability blocks shown above.
 
 """
