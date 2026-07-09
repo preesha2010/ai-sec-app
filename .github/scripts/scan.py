@@ -54,12 +54,28 @@ code = read_code(files)
 graph = buildGraph()
 
 initial_state = {
+    # input
     "code": code,
     "files_scanned": files,
+
+    # history
+    "history": [],
+    "historical_metrics": {},
+
+    # agent outputs
     "vulnerabilities": "",
+    "scanner_metrics": {},
+    "scanner_prompt": "",
     "verified_vulnerabilities": "",
+    "verifier_metrics": {},
+    "verifier_prompt": "",
+    "mitigator_prompt": "",
+    "mitigator_metrics": {},
     "feedback": "",
-    "final_report": ""
+    "final_report": "",
+
+    # supervisor
+    "supervisor_notes": {},
 }
 
 # LangGraph takes the initial state and sends it to the entry point, waits for the function to return updated state then passes updated state to next function cause of the edge that was defined
@@ -76,9 +92,21 @@ print("\n[AGENT 1 — SCANNER]")
 print("Job: Find candidate vulnerabilities")
 print(result["vulnerabilities"])
 
+print("\n[SUPERVISOR CHECKPOINT 1 — after Scanner]")
+scanner_notes = result.get("supervisor_notes", {}).get("scanner", {})
+print(f"Status: {scanner_notes.get('status', 'N/A')}")
+for obs in scanner_notes.get("observations", []):
+    print(f"  — {obs}")
+
 print("\n[AGENT 2 — VERIFIER]")
 print("Job: Cross-check findings against actual code")
 print(result["verified_vulnerabilities"])
+
+print("\n[SUPERVISOR CHECKPOINT 2 — after Verifier]")
+verifier_notes = result.get("supervisor_notes", {}).get("verifier", {})
+print(f"Status: {verifier_notes.get('status', 'N/A')}")
+for obs in verifier_notes.get("observations", []):
+    print(f"  — {obs}")
 
 print("\n[AGENT 3 — FEEDBACK]")
 print("Job: Filter false positives, escalate recurring issues")
@@ -87,6 +115,12 @@ print(result["feedback"])
 print("\n[AGENT 4 — MITIGATOR]")
 print("Job: Write mitigations for processed findings")
 print(result["final_report"])
+
+print("\n[SUPERVISOR CHECKPOINT 3 — after Mitigator]")
+mitigator_notes = result.get("supervisor_notes", {}).get("mitigator", {})
+print(f"Status: {mitigator_notes.get('status', 'N/A')}")
+for obs in mitigator_notes.get("observations", []):
+    print(f"  — {obs}")
 
 # sending results to dashboard
 def send_to_dashboard(risk_level, files_scanned, report):
